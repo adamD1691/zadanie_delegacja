@@ -1,0 +1,49 @@
+version: '3'
+
+services:
+    nginx:
+        build: ./docker-conf/nginx/
+        ports:
+            - 8005:80
+        links:
+            - php
+        volumes:
+            - .:/var/www/html
+        environment:
+            - VIRTUAL_HOST=delegacja.localhost
+        networks:
+            - delegacja
+
+    php:
+        build: ./docker-conf/php/
+        links:
+            - mysql
+        expose:
+            - 9000
+        volumes:
+            - .:/var/www/html
+            - ./docker-conf/php/conf/php.ini:/usr/local/etc/php/conf.d/custom.ini
+            - ./docker-conf/php/conf/php-fpm.conf:/usr/local/etc/php-fpm.d/custom.conf
+        environment:
+            PHP_IDE_CONFIG: "serverName=delegacja"
+        networks:
+            - delegacja
+
+
+    mysql:
+        image: mysql:5.7
+        ports:
+            - 33069:3306
+        volumes:
+            - /var/lib/mysql
+        environment:
+            MYSQL_ROOT_PASSWORD: secret
+            MYSQL_DATABASE: delegacja
+            MYSQL_USER: delegat
+            MYSQL_PASSWORD: delegat
+        networks:
+            - delegacja
+
+networks:
+    delegacja:
+
